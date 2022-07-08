@@ -10,7 +10,7 @@ const getNormalTable = async (page) => {
 
     for (const row of tbody.rows) {
       const [keyCell, ...cells] = row.cells
-      dataObject[keyCell.innerText] = cells.map(a => a.innerText)
+      dataObject[keyCell.innerText] = cells.map((a) => a.innerText)
     }
     return dataObject
   })
@@ -19,7 +19,16 @@ const getNormalTable = async (page) => {
 }
 
 export const getGrades = async () => {
-  const browser = await pup.launch()
+  const browser = await pup.launch({
+    headless: true,
+    args: [
+      '--disable-gpu',
+      '--disable-dev-shm-usage',
+      '--disable-setuid-sandbox',
+      '--no-sandbox'
+    ]
+  })
+  
   const page = await browser.newPage()
   await page.goto(url, { waitFor: 'networkidle2' })
 
