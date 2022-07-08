@@ -15,6 +15,7 @@ RUN addgroup -S pptruser && adduser -S -G pptruser pptruser \
     && chown -R pptruser:pptruser /home/pptruser \
     && chown -R pptruser:pptruser /app
 
+RUN addgroup pptruser disk && addgroup pptruser floppy && addgroup pptruser netdev && addgroup pptruser users && addgroup pptruser lp
 # Create app directory
 WORKDIR /home/pptruser/watchdog
 
