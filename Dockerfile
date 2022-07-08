@@ -1,55 +1,37 @@
-FROM node:latest
+FROM alpine
+
+RUN apk add --no-cache \
+      chromium \
+      nss \
+      freetype \
+      harfbuzz \
+      ca-certificates \
+      ttf-freefont \
+      nodejs-current \
+      npm
+
+RUN addgroup -S pptruser && adduser -S -G pptruser pptruser \
+    && mkdir -p /home/pptruser/Downloads /app \
+    && chown -R pptruser:pptruser /home/pptruser \
+    && chown -R pptruser:pptruser /app
 
 # Create app directory
-WORKDIR /usr/src/watchdog
-
-# Pupeeteer dependencies
-RUN apt-get install -y \
-    fonts-liberation \
-    gconf-service \
-    libappindicator1 \
-    libasound2 \
-    libatk1.0-0 \
-    libcairo2 \
-    libcups2 \
-    libfontconfig1 \
-    libgbm-dev \
-    libgdk-pixbuf2.0-0 \
-    libgtk-3-0 \
-    libicu-dev \
-    libjpeg-dev \
-    libnspr4 \
-    libnss3 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libpng-dev \
-    libx11-6 \
-    libx11-xcb1 \
-    libxcb1 \
-    libxcomposite1 \
-    libxcursor1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    libxi6 \
-    libxrandr2 \
-    libxrender1 \
-    libxss1 \
-    libxtst6 \
-    xdg-utils
+WORKDIR /home/pptruser/watchdog
 
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 # where available (npm@5+)
 COPY package*.json ./
 
-RUN npm ci --only=production
-# If you are building your code for production
-# RUN npm ci --only=production
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-RUN chmod -R o+rwx node_modules/puppeteer/.local-chromium
+RUN npm i -y
 
 # Bundle app source
 COPY . .
+
+# Run everything after as non-privileged user.
+USER pptruser
 
 CMD [ "node", "index.js" ]
